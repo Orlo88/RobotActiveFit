@@ -1,0 +1,30 @@
+name: Precios diarios ActiveFit
+
+on:
+  schedule:
+    # 11:30 UTC = 5:30am en Costa Rica. Corre antes que el Apps Script de las 6am.
+    - cron: '30 11 * * *'
+  workflow_dispatch:   # boton para correrlo a mano cuando quiera
+
+jobs:
+  precios:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar Playwright
+        run: |
+          npm init -y
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      - name: Leer precios
+        env:
+          CSV_URL:    ${{ secrets.CSV_URL }}
+          WEBAPP_URL: ${{ secrets.WEBAPP_URL }}
+          TOKEN:      ${{ secrets.TOKEN }}
+        run: node scraper.js
